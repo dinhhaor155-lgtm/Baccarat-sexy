@@ -252,7 +252,7 @@
       width: 21px;
       height: 21px;
       border: 3px solid currentColor;
-      font-size: 12px;
+      font-size: 0;
     }
 
     .bead.small {
@@ -512,7 +512,6 @@
           const pos = roadPosition(colIndex, rowIndex);
           const bead = document.createElement("div");
           bead.className = `bead big ${value === "B" ? "banker" : "player"}`;
-          bead.textContent = value === "B" ? "B" : "P";
           bead.style.left = `calc(${pos.col} * var(--cell) + 1px)`;
           bead.style.top = `calc(${pos.row} * var(--cell) + 1px)`;
           els.bigRoad.appendChild(bead);
@@ -523,23 +522,44 @@
     }
 
     function renderSlashRoad(container, road, metaId) {
-      const maxCol = road.reduce((max, item) => {
-        return Math.max(max, roadPosition(item.col, item.row).col);
-      }, 0);
+      const laidOutRoad = layoutColorRoad(road);
+      const maxCol = laidOutRoad.reduce((max, item) => Math.max(max, item.col), 0);
       const maxCols = Math.max(34, maxCol + 4);
       container.style.setProperty("--cols", maxCols);
       container.innerHTML = "";
 
-      road.forEach(item => {
-        const pos = roadPosition(item.col, item.row);
+      laidOutRoad.forEach(item => {
         const slash = document.createElement("div");
         slash.className = `slash ${item.color === "red" ? "red" : "blue"}`;
-        slash.style.left = `calc(${pos.col} * var(--small-cell) - 1px)`;
-        slash.style.top = `calc(${pos.row} * var(--small-cell) - 1px)`;
+        slash.style.left = `calc(${item.col} * var(--small-cell) - 1px)`;
+        slash.style.top = `calc(${item.row} * var(--small-cell) - 1px)`;
         container.appendChild(slash);
       });
 
       document.getElementById(metaId).textContent = `${road.length} nút`;
+    }
+
+    function layoutColorRoad(road) {
+      const output = [];
+      let col = -1;
+      let row = 0;
+      let lastColor = "";
+
+      for (const item of road) {
+        if (item.color !== lastColor) {
+          col += 1;
+          row = 0;
+          lastColor = item.color;
+        } else if (row < 5) {
+          row += 1;
+        } else {
+          col += 1;
+        }
+
+        output.push({ color: item.color, col, row });
+      }
+
+      return output;
     }
 
     function roadPosition(col, row) {

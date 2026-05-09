@@ -10,6 +10,11 @@ from pathlib import Path
 app = Flask(__name__, static_folder=".", static_url_path="")
 
 URL = "https://aibcr.me/baccarat/getnewresult"
+DEFAULT_SECRETS = {
+    "AIBCR_CSRF_TOKEN": "uj5s3TAkJFEngbLT6Nh4e5gBNTJr8m6J5C2WZsqF",
+    "AIBCR_XSRF_TOKEN": "eyJpdiI6ImRFNE9DOFM1ZmNjblMvdlBOa05GQmc9PSIsInZhbHVlIjoiUTVNZ0pOUVpJaERpQXVwRG5KOThzRjMwRnExNVQ2TkpqVW85T0ZsRjlGeXRGSlphMTBsNXZPdHhaZ2l5SUVXamJHNkNqNERrUzVVK094ODhaMDdoWkpXb1llZVZQOUw3QWI1SktrUk1sNWthYlJrbzlZOGdudnJvaGVwN3ZDQm4iLCJtYWMiOiIzZTEzMTVkYzM2MjY2ODM0ODRlMWI2MzAxZDY4YjliOTI2ZmE1MzlmNTJkMDE1MDM2OGEwYzEyMjdiYjFhOTQ5IiwidGFnIjoiIn0%3D",
+    "AIBCR_LARAVEL_SESSION": "eyJpdiI6IkFpT0FtT0ltblVpSUtPUjcvV2xDbVE9PSIsInZhbHVlIjoiL3RFYXJBbU9sUlYwb1ZSVWE1Z00zcEdqeUsyYXRLQnZVRkNYeGxpb2loSHhIaW1tQWVJaWJhVDFISGtIZHhYWG5iUVh6b2JmMlRzMTFTazNKbG9FS0VIalZGMFdQOHB0OTErQ2NGZm5ka1RHVUNYK0xzakVUVzljN1lvOFNWWFkiLCJtYWMiOiIyYjFiYTNmYjk2MzI4OWI1NTdiNmEwMWIyMjI0NWY2OWZhZDliNGMzMDhjMmM3NjM4YTgxYTE5ZmNjNTVmMzI1IiwidGFnIjoiIn0%3D",
+}
 
 
 def load_secret(name: str) -> str:
@@ -19,12 +24,15 @@ def load_secret(name: str) -> str:
 
     secrets_file = Path(__file__).with_name("secrets.json")
     if not secrets_file.exists():
-        return ""
+        return DEFAULT_SECRETS.get(name, "")
 
     try:
-        return json.loads(secrets_file.read_text(encoding="utf-8")).get(name, "")
+        return json.loads(secrets_file.read_text(encoding="utf-8")).get(
+            name,
+            DEFAULT_SECRETS.get(name, "")
+        )
     except Exception:
-        return ""
+        return DEFAULT_SECRETS.get(name, "")
 
 
 AIBCR_CSRF_TOKEN = load_secret("AIBCR_CSRF_TOKEN")

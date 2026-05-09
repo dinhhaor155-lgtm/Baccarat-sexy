@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Baccarat Roads</title>
+  <style>
+    :root {
+      --bg: #151815;
+      --panel: #222b22;
+      --panel-2: #2d3b2f;
+      --line: #d9ded9;
+      --line-dark: #313831;
+      --text: #eef5ed;
+      --muted: #9aa79a;
+      --blue: #1374c9;
+      --red: #e00017;
+      --green: #00b34a;
+      --gold: #d6bd61;
+      --cell: 23px;
+      --small-cell: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      overflow-x: auto;
+    }
+
+    .topbar {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 3px 10px;
+      background: #202220;
+      border-bottom: 1px solid #040604;
+      white-space: nowrap;
+    }
+
+    .brand {
+      font-weight: 800;
+      color: #7cc6ff;
+      margin-right: 8px;
+      letter-spacing: .2px;
+    }
+
+    select, button {
+      height: 26px;
+      border: 1px solid #4b584b;
+      background: #111711;
+      color: var(--text);
+      font-weight: 700;
+      padding: 0 9px;
+      border-radius: 3px;
+    }
+
+    button {
+      cursor: pointer;
+      background: #0b8d36;
+      border-color: #23c85d;
+    }
+
+    button.secondary {
+      background: #2b302b;
+      border-color: #616961;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 12px;
+      margin-left: auto;
+    }
+
+    .tables-strip {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(110px, 1fr));
+      gap: 2px;
+      padding: 3px 8px 2px;
+      min-width: 900px;
+      background: #151815;
+    }
+
+    .table-tile {
+      min-height: 36px;
+      border: 1px solid #3f5a3d;
+      background: #19281b;
+      color: #627162;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-weight: 800;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+
+    .table-tile.active {
+      color: #9dff88;
+      border-color: #75b66e;
+      background: #203820;
+    }
+
+    .table-tile span {
+      font-size: 11px;
+      color: #738173;
+      margin-top: 2px;
+    }
+
+    .score-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(170px, 1fr));
+      gap: 4px;
+      padding: 2px 8px 5px;
+      min-width: 900px;
+      background: #151815;
+    }
+
+    .score-card {
+      height: 78px;
+      border: 1px solid #4b6548;
+      background: var(--panel-2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .score-card .label {
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .score-card .sub {
+      margin-top: 7px;
+      font-size: 11px;
+      color: #d5ddd3;
+      font-weight: 700;
+    }
+
+    .score-card .count {
+      position: absolute;
+      right: 8px;
+      bottom: 6px;
+      font-size: 11px;
+      color: #e5d48e;
+      font-weight: 700;
+    }
+
+    .blue-text { color: #2d99ff; }
+    .red-text { color: #ff182c; }
+    .green-text { color: #83e442; }
+    .gold-text { color: #d8c45d; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(540px, 1.2fr) minmax(400px, .9fr);
+      gap: 6px;
+      padding: 0 8px 8px;
+      min-width: 940px;
+    }
+
+    .road-panel {
+      background: #fff;
+      border: 1px solid #050505;
+      overflow: hidden;
+      min-height: 144px;
+    }
+
+    .road-title {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+      background: #1e241f;
+      color: #d8dfd6;
+      font-size: 12px;
+      font-weight: 800;
+      border-bottom: 1px solid #0b0d0b;
+    }
+
+    .road-title .meta {
+      color: #94a194;
+      font-weight: 700;
+    }
+
+    .grid-wrap {
+      overflow: auto;
+      background: #fff;
+    }
+
+    .small-stack .grid-wrap {
+      height: 72px;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .big-grid, .small-grid {
+      position: relative;
+      display: grid;
+      background-color: #fff;
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .big-grid {
+      grid-template-columns: repeat(var(--cols), var(--cell));
+      grid-template-rows: repeat(6, var(--cell));
+      background-image:
+        linear-gradient(to right, var(--line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+      background-size: var(--cell) var(--cell);
+    }
+
+    .small-stack {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .small-grid {
+      grid-template-columns: repeat(var(--cols), var(--small-cell));
+      grid-template-rows: repeat(6, var(--small-cell));
+      height: 72px;
+      background-image:
+        linear-gradient(to right, var(--line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+      background-size: var(--small-cell) var(--small-cell);
+    }
+
+    .bead {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #fff;
+      font-weight: 900;
+    }
+
+    .bead.big {
+      width: 21px;
+      height: 21px;
+      border: 3px solid currentColor;
+      font-size: 12px;
+    }
+
+    .bead.small {
+      width: 9px;
+      height: 9px;
+      border: 2px solid currentColor;
+      font-size: 0;
+    }
+
+    .bead.player { color: var(--blue); }
+    .bead.banker { color: var(--red); }
+    .bead.tie {
+      color: #18a84a;
+      border-color: #18a84a;
+      background: #fff;
+    }
+
+    .slash {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-right: 2px solid currentColor;
+      transform: rotate(42deg);
+      transform-origin: center;
+    }
+
+    .slash.red { color: var(--red); }
+    .slash.blue { color: var(--blue); }
+
+    .empty {
+      color: #5e685e;
+      padding: 18px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .tables-strip, .score-row, .layout { min-width: 760px; }
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">AE Baccarat Roads</div>
+    <label for="tableSelect">Bàn</label>
+    <select id="tableSelect"></select>
+    <button id="reloadBtn">Reload</button>
+    <button class="secondary" id="autoBtn">Auto: On</button>
+    <div class="status" id="status">Đang tải...</div>
+  </header>
+
+  <section class="tables-strip" id="tablesStrip"></section>
+
+  <section class="score-row">
+    <div class="score-card">
+      <div class="label blue-text">Tay con</div>
+      <div class="sub" id="playerRate">0%</div>
+      <div class="count" id="playerCount">0</div>
+    </div>
+    <div class="score-card">
+      <div class="label green-text">Hòa</div>
+      <div class="sub" id="tieRate">0%</div>
+      <div class="count" id="tieCount">0</div>
+    </div>
+    <div class="score-card">
+      <div class="label red-text">Nhà cái</div>
+      <div class="sub" id="bankerRate">0%</div>
+      <div class="count" id="bankerCount">0</div>
+    </div>
+    <div class="score-card">
+      <div class="label gold-text" id="goodRoad">Cầu</div>
+      <div class="sub" id="tableName">-</div>
+      <div class="count" id="handCount">0 ván</div>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="road-panel">
+      <div class="road-title">
+        <span>Big Road</span>
+        <span class="meta" id="bigMeta"></span>
+      </div>
+      <div class="grid-wrap">
+        <div class="big-grid" id="bigRoad"></div>
+      </div>
+    </section>
+
+    <section class="small-stack">
+      <section class="road-panel">
+        <div class="road-title">
+          <span>Big Eye Boy</span>
+          <span class="meta" id="bebMeta"></span>
+        </div>
+        <div class="grid-wrap">
+          <div class="small-grid" id="bigEyeBoy"></div>
+        </div>
+      </section>
+
+      <section class="road-panel">
+        <div class="road-title">
+          <span>Small Road</span>
+          <span class="meta" id="smallMeta"></span>
+        </div>
+        <div class="grid-wrap">
+          <div class="small-grid" id="smallRoad"></div>
+        </div>
+      </section>
+
+      <section class="road-panel">
+        <div class="road-title">
+          <span>Cockroach Pig</span>
+          <span class="meta" id="cockroachMeta"></span>
+        </div>
+        <div class="grid-wrap">
+          <div class="small-grid" id="cockroachPig"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      tables: [],
+      selectedKey: "",
+      auto: true,
+      timer: null,
+      loading: false
+    };
+
+    const els = {
+      status: document.getElementById("status"),
+      select: document.getElementById("tableSelect"),
+      strip: document.getElementById("tablesStrip"),
+      bigRoad: document.getElementById("bigRoad"),
+      bigEyeBoy: document.getElementById("bigEyeBoy"),
+      smallRoad: document.getElementById("smallRoad"),
+      cockroachPig: document.getElementById("cockroachPig"),
+      reloadBtn: document.getElementById("reloadBtn"),
+      autoBtn: document.getElementById("autoBtn")
+    };
+
+    const keyOf = table => `${table.game_code}:${table.table_id}`;
+    const pct = (part, total) => total ? `${Math.round(part * 100 / total)}%` : "0%";
+
+    function setStatus(text) {
+      els.status.textContent = text;
+    }
+
+    async function loadRoads(keepSelection = true) {
+      if (state.loading) return;
+      state.loading = true;
+      setStatus("Đang tải dữ liệu...");
+      try {
+        const res = await fetch(`/roads?ts=${Date.now()}`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const payload = await res.json();
+        state.tables = payload.data || [];
+
+        if (!state.tables.length) {
+          setStatus("Không có dữ liệu bàn AE");
+          renderEmpty();
+          return;
+        }
+
+        const stillExists = state.tables.some(table => keyOf(table) === state.selectedKey);
+        if (!keepSelection || !state.selectedKey || !stillExists) {
+          state.selectedKey = keyOf(state.tables[0]);
+        }
+
+        renderTableControls();
+        renderSelected();
+        setStatus(`Đã cập nhật ${new Date().toLocaleTimeString("vi-VN")}`);
+      } finally {
+        state.loading = false;
+      }
+    }
+
+    function renderTableControls() {
+      els.select.innerHTML = "";
+      els.strip.innerHTML = "";
+
+      for (const table of state.tables) {
+        const key = keyOf(table);
+        const label = `${table.game_code.toUpperCase()} ${table.table_name || table.table_id}`;
+
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = label;
+        option.selected = key === state.selectedKey;
+        els.select.appendChild(option);
+
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = `table-tile${key === state.selectedKey ? " active" : ""}`;
+        tile.dataset.key = key;
+        tile.innerHTML = `${table.table_name || table.table_id}<span>${table.result.length} ván</span>`;
+        tile.addEventListener("click", () => {
+          state.selectedKey = key;
+          renderTableControls();
+          renderSelected();
+        });
+        els.strip.appendChild(tile);
+      }
+    }
+
+    function renderSelected() {
+      const table = state.tables.find(item => keyOf(item) === state.selectedKey) || state.tables[0];
+      if (!table) {
+        renderEmpty();
+        return;
+      }
+
+      const result = table.result || "";
+      const banker = [...result].filter(ch => ch === "B").length;
+      const player = [...result].filter(ch => ch === "P").length;
+      const tie = [...result].filter(ch => ch === "T").length;
+      const total = banker + player + tie;
+
+      document.getElementById("playerRate").textContent = pct(player, total);
+      document.getElementById("bankerRate").textContent = pct(banker, total);
+      document.getElementById("tieRate").textContent = pct(tie, total);
+      document.getElementById("playerCount").textContent = player;
+      document.getElementById("bankerCount").textContent = banker;
+      document.getElementById("tieCount").textContent = tie;
+      document.getElementById("goodRoad").textContent = table.goodRoad || "Không cầu";
+      document.getElementById("tableName").textContent = `${table.game_code.toUpperCase()} - bàn ${table.table_name || table.table_id}`;
+      document.getElementById("handCount").textContent = `${result.length} ván`;
+
+      renderBigRoad(table.columns || []);
+      renderSlashRoad(els.bigEyeBoy, table.big_eye_boy || [], "bebMeta");
+      renderSlashRoad(els.smallRoad, table.small_road || [], "smallMeta");
+      renderSlashRoad(els.cockroachPig, table.cockroach_pig || [], "cockroachMeta");
+    }
+
+    function renderEmpty() {
+      els.select.innerHTML = "";
+      els.strip.innerHTML = "";
+      els.bigRoad.innerHTML = `<div class="empty">Không có dữ liệu</div>`;
+      els.bigEyeBoy.innerHTML = "";
+      els.smallRoad.innerHTML = "";
+      els.cockroachPig.innerHTML = "";
+    }
+
+    function renderBigRoad(columns) {
+      const tailCol = columns.reduce((max, column, colIndex) => {
+        return Math.max(max, ...column.map((_, rowIndex) => roadPosition(colIndex, rowIndex).col));
+      }, 0);
+      const maxCols = Math.max(24, tailCol + 3);
+      els.bigRoad.style.setProperty("--cols", maxCols);
+      els.bigRoad.style.minHeight = `calc(var(--cell) * 6)`;
+      els.bigRoad.innerHTML = "";
+
+      columns.forEach((column, colIndex) => {
+        column.forEach((value, rowIndex) => {
+          const pos = roadPosition(colIndex, rowIndex);
+          const bead = document.createElement("div");
+          bead.className = `bead big ${value === "B" ? "banker" : "player"}`;
+          bead.textContent = value === "B" ? "B" : "P";
+          bead.style.left = `calc(${pos.col} * var(--cell) + 1px)`;
+          bead.style.top = `calc(${pos.row} * var(--cell) + 1px)`;
+          els.bigRoad.appendChild(bead);
+        });
+      });
+
+      document.getElementById("bigMeta").textContent = `${columns.length} cột`;
+    }
+
+    function renderSlashRoad(container, road, metaId) {
+      const maxCol = road.reduce((max, item) => {
+        return Math.max(max, roadPosition(item.col, item.row).col);
+      }, 0);
+      const maxCols = Math.max(34, maxCol + 4);
+      container.style.setProperty("--cols", maxCols);
+      container.innerHTML = "";
+
+      road.forEach(item => {
+        const pos = roadPosition(item.col, item.row);
+        const slash = document.createElement("div");
+        slash.className = `slash ${item.color === "red" ? "red" : "blue"}`;
+        slash.style.left = `calc(${pos.col} * var(--small-cell) - 1px)`;
+        slash.style.top = `calc(${pos.row} * var(--small-cell) - 1px)`;
+        container.appendChild(slash);
+      });
+
+      document.getElementById(metaId).textContent = `${road.length} nút`;
+    }
+
+    function roadPosition(col, row) {
+      if (row < 6) {
+        return { col, row };
+      }
+
+      return { col: col + row - 5, row: 5 };
+    }
+
+    els.select.addEventListener("change", event => {
+      state.selectedKey = event.target.value;
+      renderTableControls();
+      renderSelected();
+    });
+
+    els.reloadBtn.addEventListener("click", () => {
+      loadRoads(true).catch(error => setStatus(`Lỗi: ${error.message}`));
+    });
+
+    els.autoBtn.addEventListener("click", () => {
+      state.auto = !state.auto;
+      els.autoBtn.textContent = `Auto: ${state.auto ? "On" : "Off"}`;
+    });
+
+    state.timer = setInterval(() => {
+      if (state.auto) {
+        loadRoads(true).catch(error => setStatus(`Lỗi: ${error.message}`));
+      }
+    }, 30000);
+
+    loadRoads(false).catch(error => setStatus(`Lỗi: ${error.message}`));
+  </script>
+</body>
+</html>

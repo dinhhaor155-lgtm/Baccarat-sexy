@@ -229,11 +229,7 @@ def call_api():
 
 @app.route("/")
 def home():
-    return jsonify({
-        "name": "baccarat-sexy-api",
-        "status": "running",
-        "endpoints": ["/status", "/api", "/pretty", "/roads"]
-    })
+    return app.send_static_file("index.html")
 
 
 @app.route("/status")

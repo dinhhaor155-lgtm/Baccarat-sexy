@@ -5,13 +5,31 @@ from flask import Flask, Response, jsonify
 import requests
 import json
 import os
+from pathlib import Path
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
 URL = "https://aibcr.me/baccarat/getnewresult"
-AIBCR_CSRF_TOKEN = os.environ.get("AIBCR_CSRF_TOKEN", "")
-AIBCR_XSRF_TOKEN = os.environ.get("AIBCR_XSRF_TOKEN", "")
-AIBCR_LARAVEL_SESSION = os.environ.get("AIBCR_LARAVEL_SESSION", "")
+
+
+def load_secret(name: str) -> str:
+    value = os.environ.get(name)
+    if value:
+        return value
+
+    secrets_file = Path(__file__).with_name("secrets.json")
+    if not secrets_file.exists():
+        return ""
+
+    try:
+        return json.loads(secrets_file.read_text(encoding="utf-8")).get(name, "")
+    except Exception:
+        return ""
+
+
+AIBCR_CSRF_TOKEN = load_secret("AIBCR_CSRF_TOKEN")
+AIBCR_XSRF_TOKEN = load_secret("AIBCR_XSRF_TOKEN")
+AIBCR_LARAVEL_SESSION = load_secret("AIBCR_LARAVEL_SESSION")
 
 HEADERS = {
     "authority": "aibcr.me",

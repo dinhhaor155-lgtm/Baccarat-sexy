@@ -20,6 +20,8 @@ Set these Railway variables from your current browser/session before deploying:
 - `AIBCR_XSRF_TOKEN`
 - `AIBCR_LARAVEL_SESSION`
 
+For local runs, you can also create `secrets.json` from `secrets.example.json`. Do not commit `secrets.json` to a public repository.
+
 ## Run locally
 
 ```bash
